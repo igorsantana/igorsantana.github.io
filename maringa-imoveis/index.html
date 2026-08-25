@@ -137,7 +137,35 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
 }).addTo(map);
 
-const heat = L.heatLayer([], { radius: 22, blur: 18, maxZoom: 16, max: 1.0, gradient: {0.15:'#2ecc71',0.35:'#ffd54f',0.55:'#ff9800',0.75:'#e53935',1:'#8e0000'} });
+const heat = L.heatLayer([], {
+  radius: 20,
+  blur: 26,
+  maxZoom: 17,
+  max: 1.0,
+  minOpacity: 0.12,
+  gradient: {0.3:'#2ecc71',0.5:'#ffd54f',0.7:'#ff9800',0.85:'#e53935',1:'#8e0000'}
+});
+
+function configureHeat(filteredCount, mode) {
+  const n = Math.max(filteredCount, 1);
+  const opts = {
+    minOpacity: 0.1,
+    blur: n > 2000 ? 32 : n > 600 ? 26 : 20,
+    radius: n > 2000 ? 14 : n > 600 ? 18 : 22,
+    max: mode === 'preco' ? 1.0 : Math.max(8, Math.pow(n, 0.58)),
+  };
+  if (heat._heat && typeof heat._heat.radius === 'function') {
+    heat._heat.radius(opts.radius, opts.blur);
+  }
+  if (heat._heat) heat._heat._max = opts.max;
+  if (heat.options) Object.assign(heat.options, opts);
+  return opts;
+}
+
+function heatPointIntensity(rec, filteredCount, mode, cap) {
+  if (mode === 'preco') return Math.min(1, rec[3] / cap);
+  return Math.min(0.2, 5 / Math.sqrt(Math.max(filteredCount, 1)));
+}
 
 let current = null;   // current marker layer
 
@@ -249,12 +277,13 @@ function render() {
 
   if (currentMode === 'calor') {
     updateLegend();
-    const cap = DATA.breaks_pm2[5] || 1; // p95 de R$/m² = teto de normalização
+    const cap = DATA.breaks_pm2[5] || 1;
+    configureHeat(filtered.length, heatWeight);
     let pts;
     if (heatWeight === 'preco') {
-      pts = filtered.filter(r => r[3] != null).map(r => [r[1], r[0], Math.min(1, r[3] / cap)]);
+      pts = filtered.filter(r => r[3] != null).map(r => [r[1], r[0], heatPointIntensity(r, filtered.length, 'preco', cap)]);
     } else {
-      pts = filtered.map(r => [r[1], r[0], 1]);
+      pts = filtered.map(r => [r[1], r[0], heatPointIntensity(r, filtered.length, 'densidade', cap)]);
     }
     heat.setLatLngs(pts);
     if (!map.hasLayer(heat)) heat.addTo(map);
