@@ -139,32 +139,32 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 const heat = L.heatLayer([], {
   radius: 20,
-  blur: 26,
+  blur: 22,
   maxZoom: 17,
   max: 1.0,
-  minOpacity: 0.12,
-  gradient: {0.3:'#2ecc71',0.5:'#ffd54f',0.7:'#ff9800',0.85:'#e53935',1:'#8e0000'}
+  minOpacity: 0.2,
+  gradient: {0.25:'#2ecc71',0.45:'#ffd54f',0.65:'#ff9800',0.82:'#e53935',1:'#8e0000'}
 });
 
-function configureHeat(filteredCount, mode) {
+function applyHeatOptions(filteredCount, mode) {
   const n = Math.max(filteredCount, 1);
   const opts = {
-    minOpacity: 0.1,
-    blur: n > 2000 ? 32 : n > 600 ? 26 : 20,
-    radius: n > 2000 ? 14 : n > 600 ? 18 : 22,
-    max: mode === 'preco' ? 1.0 : Math.max(8, Math.pow(n, 0.58)),
+    radius: n > 3000 ? 15 : n > 800 ? 18 : 22,
+    blur: n > 3000 ? 26 : 22,
+    minOpacity: 0.22,
+    max: mode === 'preco' ? 1.0 : Math.max(12, Math.sqrt(n) * 0.7),
   };
-  if (heat._heat && typeof heat._heat.radius === 'function') {
-    heat._heat.radius(opts.radius, opts.blur);
+  if (typeof heat.setOptions === 'function') {
+    heat.setOptions(opts);
+  } else {
+    Object.assign(heat.options, opts);
+    if (heat._heat) {
+      heat._heat.radius(opts.radius, opts.blur);
+      if (typeof heat._heat.max === 'function') heat._heat.max(opts.max);
+      else heat._heat._max = opts.max;
+    }
   }
-  if (heat._heat) heat._heat._max = opts.max;
-  if (heat.options) Object.assign(heat.options, opts);
   return opts;
-}
-
-function heatPointIntensity(rec, filteredCount, mode, cap) {
-  if (mode === 'preco') return Math.min(1, rec[3] / cap);
-  return Math.min(0.2, 5 / Math.sqrt(Math.max(filteredCount, 1)));
 }
 
 let current = null;   // current marker layer
@@ -269,26 +269,28 @@ function render() {
 
   if (current !== null) {
     map.removeLayer(current);
+    current = null;
   }
   if (currentMode !== 'calor' && map.hasLayer(heat)) {
     map.removeLayer(heat);
   }
-  current = L.layerGroup().addTo(map);
 
   if (currentMode === 'calor') {
     updateLegend();
     const cap = DATA.breaks_pm2[5] || 1;
-    configureHeat(filtered.length, heatWeight);
+    if (!map.hasLayer(heat)) heat.addTo(map);
+    applyHeatOptions(filtered.length, heatWeight);
     let pts;
     if (heatWeight === 'preco') {
-      pts = filtered.filter(r => r[3] != null).map(r => [r[1], r[0], heatPointIntensity(r, filtered.length, 'preco', cap)]);
+      pts = filtered.filter(r => r[3] != null).map(r => [r[1], r[0], Math.min(1, r[3] / cap)]);
     } else {
-      pts = filtered.map(r => [r[1], r[0], heatPointIntensity(r, filtered.length, 'densidade', cap)]);
+      pts = filtered.map(r => [r[1], r[0], 1]);
     }
     heat.setLatLngs(pts);
-    if (!map.hasLayer(heat)) heat.addTo(map);
     return;
   }
+
+  current = L.layerGroup().addTo(map);
 
   if (currentMetric === 'tipo') {
     // one marker per point, colored by type
