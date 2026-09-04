@@ -1,98 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <script src="https://use.fontawesome.com/3428b0e359.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Igor Santana</title>
+  <meta name="description" content="Igor Santana — Senior Software Engineer">
+  <title>Igor Santana — Resume</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="assets/index.css">
 </head>
-
 <body>
-  <section id="left_side">
-    <div class="gradient bg-navyblue"></div>
-    <div class="gradient bg-dark_cornflower_blue"></div>
-    <div class="gradient bg-star_command_blue"></div>
-    <div class="gradient bg-blue_green"></div>
-    <div class="gradient bg-cerulean_crayola"></div>
-    <div class="gradient bg-sky_blue_crayola"></div>
-    <div class="gradient bg-sky_blue_crayola_light"></div>
-    <div class="gradient bg-blizzard_blue"></div>
-  </section>
-  <section id="main">
-    <img src="files/profile.png" alt="Profile picture" id="profile">
-    <div id="basic-info">
-      <h1>Igor André Pegoraro Santana</h1>
-      <hr>
-      <h2>Bacharel em Informática e Mestrando em Ciência da Computação</h2>
-      <p id="subtitle">Universidade Estadual de Maringá</p>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <p class="site-id">igor.santana</p>
+      <div class="toolbar">
+        <div class="toolbar-group" role="group" aria-label="Theme">
+          <button type="button" id="theme-toggle" class="toggle toggle--icon" aria-pressed="true" aria-label="Switch to day mode">
+            <i id="theme-toggle-icon" class="fa-solid fa-sun" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="lang-dropdown" id="lang-dropdown">
+          <button
+            type="button"
+            id="lang-toggle"
+            class="toggle lang-dropdown__trigger"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="lang-menu"
+            aria-label="Select language"
+          >
+            <img id="lang-current-flag" class="lang-flag" src="assets/flags/gb.svg" width="20" height="15" alt="">
+            <span id="lang-current-label">English</span>
+            <i class="fa-solid fa-chevron-down lang-dropdown__chevron" aria-hidden="true"></i>
+          </button>
+          <ul class="lang-dropdown__menu" id="lang-menu" role="listbox" hidden>
+            <li role="presentation">
+              <button type="button" class="lang-dropdown__option" data-lang-option="en" role="option" aria-selected="true">
+                <img class="lang-flag" src="assets/flags/gb.svg" width="20" height="15" alt="">
+                <span data-toggle-label="langEn">English</span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button type="button" class="lang-dropdown__option" data-lang-option="pt" role="option" aria-selected="false">
+                <img class="lang-flag" src="assets/flags/br.svg" width="20" height="15" alt="">
+                <span data-toggle-label="langPt">Portuguese</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
 
-      <h3>Programador</h3>
-      <p id="subtitle">FarmGO</p>
-      <hr>
-    </div>
-    <div id="social">
-      <a href="https://www.linkedin.com/in/igorpsantana/" target="_blank">
-        <i class="fa fa-linkedin"></i>
-        Linkedin
-      </a>
-      <a href="http://lattes.cnpq.br/8815284137001035" target="_blank">
-        <i class="fa fa-id-card"></i>
-        Lattes
-      </a>
-      <a href="https://github.com/igorsantana" target="_blank">
-        <i class="fa fa-github"></i> Github
-      </a>
-    </div>
-    <div id="works">
-      <h2 class="artigos">Artigos Científicos:</h2>
-      <ul>
-        <li>
-          <p class="paper-title"> Transforming Geo-Referenced Data in Contextual Information for Context-Aware Recommender Systems</p>
-          <p class="paper-info">Publicado em: 2018 IEEE/WIC/ACM International Conference on Web Intelligence (WI)</p>
-        </li>
-        <li>
-          <p class="paper-title"> Music4All: A New Music Database and Its Applications</p>
-          <p class="paper-info">Publicado em: 27th International Conference on Systems, Signals and Image Processing, IWSSIP 2020</p>
-        </li>
-        <li>
-          <p class="paper-title"> A Systematic Review on Context-Aware Recommender Systems using Deep Learning and Embeddings</p>
-          <p class="paper-info">Publicado em: arxiv.org</p>
-        </li>
-        <li>
-          <p class="paper-title"> Improving Context-Aware Music Recommender Systems with a Dual Recurrent Neural Network</p>
-          <p class="paper-info">Submetido para: 14th ACM Conference on Recommender Systems (RecSys 2020)</p>
-        </li>
-        <li>
-          <p class="paper-title"> Improving Context-Aware Music Recommendation with Metadata Awareness and Recurrent Neural Networks</p>
-          <p class="paper-info"> Submetido para: Information Retrieval Journal</p>
-        </li>
-      </ul>
+  <main class="page">
+    <section class="hero">
+      <div class="hero__identity">
+        <img src="files/profile.jpg" alt="Igor Santana" class="avatar" width="120" height="120">
+        <div class="identity">
+          <div class="identity__name-row">
+            <h1 class="name">Igor Santana</h1>
+            <nav class="contact contact--social" aria-label="Contact">
+              <a href="https://www.linkedin.com/in/igorpsantana/" target="_blank" rel="noopener noreferrer" data-link-label="linkedin" aria-label="LinkedIn">
+                <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+              </a>
+              <a href="https://github.com/igorsantana" target="_blank" rel="noopener noreferrer" data-link-label="github" aria-label="GitHub">
+                <i class="fa-brands fa-github" aria-hidden="true"></i>
+              </a>
+            </nav>
+          </div>
+          <p class="identity__role" id="role">MSc in Computer Science · Senior Software Engineer</p>
+          <p class="identity__email">
+            <a href="mailto:igorpsant95@gmail.com">igorpsant95@gmail.com</a>
+          </p>
+          <p class="identity__meta" id="location">Maringá, Brazil</p>
+        </div>
+      </div>
 
-      <h2>Trabalhos Acadêmicos:</h2>
-      <ul>
-        <li>
-          <p class="paper-title">Aplicando o Processo de Mineração de Dados para Aquisição de Informação Contextual para Sistemas de Recomendação Sensíveis ao Contexto</p>
-          <p class="paper-info">Monografia apresentada dia 04/12/2017 como Trabalho de Conclusão de Curso.</p>
-        </li>
-        <li>
-          <p class="paper-title">Exploração de Redes Neurais Recorrentes na Recomendação Sensível ao Contexto de Músicas</p>
-          <p class="paper-info">Dissertação prevista para apresentação dia 13/08/2020 como conclusão de Mestrado.</p>
-        </li>
-      </ul>
+      <div class="hero__summary">
+        <h2 class="section-title" id="section-summary">Summary</h2>
+        <div class="summary-text" id="summary-text"></div>
+      </div>
+
+      <aside class="hero__skills">
+        <h2 class="section-title" id="section-skills">Skills</h2>
+        <div id="skills-block"></div>
+      </aside>
+    </section>
+
+    <div class="layout">
+      <div class="layout__column">
+        <section class="block">
+          <h2 class="section-title" id="section-experience">Professional Experience</h2>
+          <div id="experience-list"></div>
+        </section>
+      </div>
+
+      <div class="layout__column">
+        <section class="block block--academic">
+          <h2 class="section-title" id="section-academic">Academic Experience</h2>
+          <div id="education-list"></div>
+
+          <div class="block block--nested">
+            <h2 class="section-title" id="section-publications">Publications</h2>
+            <ul class="publications" id="publications-list"></ul>
+          </div>
+        </section>
+      </div>
     </div>
-  </section>
-  <section id="right_side">
-    <div class="gradient bg-blizzard_blue"></div>
-    <div class="gradient bg-sky_blue_crayola_light"></div>
-    <div class="gradient bg-sky_blue_crayola"></div>
-    <div class="gradient bg-cerulean_crayola"></div>
-    <div class="gradient bg-blue_green"></div>
-    <div class="gradient bg-star_command_blue"></div>
-    <div class="gradient bg-dark_cornflower_blue"></div>
-    <div class="gradient bg-navyblue"></div>
-  </section>
+  </main>
+
+  <script src="assets/resume.js"></script>
 </body>
-
 </html>
