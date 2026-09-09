@@ -167,6 +167,50 @@
   margin-top: 6px;
 }
 
+.mim-start {
+  position: absolute;
+  inset: 0;
+  z-index: 1800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none;
+}
+
+.mim-start-card {
+  pointer-events: auto;
+  width: min(380px, 100%);
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  text-align: center;
+}
+
+.mim-start-btn {
+  margin-top: 14px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: #1a6fb5;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mim-start-btn:hover {
+  background: #155f9c;
+}
+
+.mim-start-btn-inline {
+  width: auto;
+  margin-top: 12px;
+}
+
 .mim-loader {
   position: absolute;
   inset: 0;
@@ -176,6 +220,22 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.92);
   padding: 24px;
+}
+
+.mim-loader-inline {
+  inset: auto;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  bottom: auto;
+  background: transparent;
+  padding: 0;
+  pointer-events: none;
+}
+
+.mim-loader-inline .mim-loader-card {
+  width: min(280px, calc(100vw - 340px));
+  pointer-events: auto;
 }
 
 .mim-loader-card {

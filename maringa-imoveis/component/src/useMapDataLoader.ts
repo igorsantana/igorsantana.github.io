@@ -58,6 +58,16 @@ export function useMapDataSource(options: { data?: MapData; dataUrl?: string }) 
   useEffect(() => {
     let cancelled = false;
 
+    if (!options.data && !options.dataUrl) {
+      setState({
+        status: 'idle',
+        progress: 0,
+        error: null,
+        data: null,
+      });
+      return undefined;
+    }
+
     if (options.data) {
       const bundled = options.data;
       setState({

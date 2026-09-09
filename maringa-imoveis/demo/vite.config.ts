@@ -10,6 +10,19 @@ export default defineConfig({
   plugins: [react()],
   // Relative paths work on GitHub Pages subpaths and local static servers.
   base: './',
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://beta-api.sub100.com.br/api',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        headers: {
+          Origin: 'https://sub100.com.br',
+          Referer: 'https://sub100.com.br/',
+        },
+      },
+    },
+  },
   build: {
     outDir: 'dist',
     emptyDir: true,

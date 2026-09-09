@@ -15,19 +15,26 @@ import {
 } from './mapUtils';
 import type {
   HeatWeight,
+  MapRecord,
   MaringaImoveisMapProps,
   MetricMode,
   ViewMode,
 } from './types';
 import { useMapDataSource } from './useMapDataLoader';
+import { useSub100LiveLoader } from './useSub100LiveLoader';
 import './MaringaImoveisMap.css';
 
 const DEFAULT_CENTER: [number, number] = [-23.43, -51.95];
 const DEFAULT_ZOOM = 12;
+const OSM_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 export function MaringaImoveisMap({
   data,
   dataUrl,
+  liveFetch = false,
+  apiBase,
+  manualStart,
   className,
   style,
   height = '100%',
@@ -42,9 +49,14 @@ export function MaringaImoveisMap({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const heatRef = useRef<L.HeatLayer | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
+  const renderedIdsRef = useRef<Set<string>>(new Set());
+  const needsFullRedrawRef = useRef(true);
 
-  const loadState = useMapDataSource({ data, dataUrl });
+  const staticState = useMapDataSource(liveFetch ? {} : { data, dataUrl });
+  const liveState = useSub100LiveLoader({ apiBase });
+  const loadState = liveFetch ? liveState : staticState;
   const mapData = loadState.data;
+  const waitForStart = liveFetch && (manualStart ?? true);
 
   const propertyTypes = useMemo(
     () =>
@@ -70,7 +82,7 @@ export function MaringaImoveisMap({
   const [heatWeight, setHeatWeight] = useState<HeatWeight>('densidade');
 
   useEffect(() => {
-    if (!mapData) return;
+    if (!mapData || !propertyTypes.length) return;
     setSelectedTypes(new Set(propertyTypes));
   }, [mapData, propertyTypes]);
 
@@ -89,8 +101,8 @@ export function MaringaImoveisMap({
       fadeAnimation: false,
     }).setView(defaultCenter, defaultZoom);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: OSM_ATTRIBUTION,
       maxZoom: 19,
     }).addTo(map);
 
@@ -117,6 +129,7 @@ export function MaringaImoveisMap({
       mapInstanceRef.current = null;
       heatRef.current = null;
       markersRef.current = null;
+      renderedIdsRef.current.clear();
     };
   }, [defaultCenter, defaultZoom]);
 
@@ -151,45 +164,63 @@ export function MaringaImoveisMap({
   }, [filtered]);
 
   const legend = useMemo(() => {
-    if (!mapData) return null;
+    if (!mapData || !mapData.records.length) return null;
     return buildLegend(mapData, viewMode, metric, heatWeight);
   }, [mapData, viewMode, metric, heatWeight]);
+
+  useEffect(() => {
+    needsFullRedrawRef.current = true;
+  }, [viewMode, metric, heatWeight, filters]);
+
+  const appendMarker = (rec: MapRecord, group: L.LayerGroup, dataForColor: NonNullable<typeof mapData>) => {
+    L.circleMarker([rec[1], rec[0]], {
+      radius: 6,
+      color: '#fff',
+      weight: 0.5,
+      fillColor: colorFor(rec, dataForColor, metric),
+      fillOpacity: 0.85,
+    })
+      .bindPopup(popupHtml(rec))
+      .addTo(group);
+  };
 
   useEffect(() => {
     const map = mapInstanceRef.current;
     const heat = heatRef.current;
     if (!map || !heat || !mapData) return;
 
-    if (markersRef.current) {
-      map.removeLayer(markersRef.current);
-      markersRef.current = null;
-    }
-    if (map.hasLayer(heat)) {
-      map.removeLayer(heat);
-    }
-
     if (viewMode === 'calor') {
+      if (markersRef.current) {
+        map.removeLayer(markersRef.current);
+        markersRef.current = null;
+        renderedIdsRef.current.clear();
+      }
+      if (!map.hasLayer(heat)) heat.addTo(map);
       applyHeatOptions(heat, filtered.length, heatWeight);
       heat.setLatLngs(buildHeatPoints(filtered, mapData, heatWeight));
-      heat.addTo(map);
       return;
     }
 
-    const group = L.layerGroup();
-    filtered.forEach((rec) => {
-      L.circleMarker([rec[1], rec[0]], {
-        radius: 6,
-        color: '#fff',
-        weight: 0.5,
-        fillColor: colorFor(rec, mapData, metric),
-        fillOpacity: 0.85,
-      })
-        .bindPopup(popupHtml(rec))
-        .addTo(group);
-    });
+    if (map.hasLayer(heat)) map.removeLayer(heat);
 
-    group.addTo(map);
+    if (needsFullRedrawRef.current) {
+      if (markersRef.current) {
+        map.removeLayer(markersRef.current);
+      }
+      markersRef.current = L.layerGroup().addTo(map);
+      renderedIdsRef.current.clear();
+      needsFullRedrawRef.current = false;
+    }
+
+    const group = markersRef.current ?? L.layerGroup().addTo(map);
     markersRef.current = group;
+
+    for (const rec of filtered) {
+      const id = rec[10];
+      if (renderedIdsRef.current.has(id)) continue;
+      renderedIdsRef.current.add(id);
+      appendMarker(rec, group, mapData);
+    }
   }, [mapData, filtered, viewMode, metric, heatWeight]);
 
   const toggleType = (type: string, checked: boolean) => {
@@ -202,12 +233,16 @@ export function MaringaImoveisMap({
   };
 
   const progressPct = Math.round(loadState.progress * 100);
-  const loadingLabel =
-    loadState.status === 'parsing'
+  const isLoading = loadState.status === 'loading' || loadState.status === 'parsing';
+  const showStart =
+    waitForStart && !liveState.started && loadState.status !== 'error';
+  const loadingLabel = liveFetch
+    ? `Carregando imóveis… ${liveState.loadedPages}/${liveState.totalPages || '?'} páginas`
+    : loadState.status === 'parsing'
       ? 'Preparando mapa…'
-      : data
-        ? 'Iniciando mapa…'
-        : 'Carregando mapa…';
+      : 'Carregando mapa…';
+
+  const panelVisible = mapData || liveFetch;
 
   return (
     <div
@@ -216,12 +251,28 @@ export function MaringaImoveisMap({
     >
       <div ref={mapRef} className="mim-map" />
 
-      {(loadState.status === 'loading' || loadState.status === 'parsing') && (
-        <div className="mim-loader" role="status" aria-live="polite">
+      {showStart && (
+        <div className="mim-start">
+          <div className="mim-start-card">
+            <div className="mim-loader-title">Mapa de imóveis em Maringá</div>
+            <div className="mim-loader-sub">
+              Busca anúncios residenciais (casa e apartamento) ao vivo no SUB100.
+            </div>
+            <button type="button" className="mim-start-btn" onClick={liveState.start}>
+              Carregar imóveis
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="mim-loader mim-loader-inline" role="status" aria-live="polite">
           <div className="mim-loader-card">
             <div className="mim-loader-title">{loadingLabel}</div>
             <div className="mim-loader-sub">
-              {data ? 'Dados embutidos no app' : 'Baixando imóveis de Maringá'}
+              {mapData?.count
+                ? `${mapData.count.toLocaleString('pt-BR')} imóveis no mapa`
+                : 'Aguardando primeiros resultados…'}
             </div>
             <div className="mim-progress" aria-hidden="true">
               <div className="mim-progress-bar" style={{ width: `${progressPct}%` }} />
@@ -236,11 +287,16 @@ export function MaringaImoveisMap({
           <div>
             <strong>Não foi possível carregar o mapa.</strong>
             <div>{loadState.error?.message}</div>
+            {liveFetch && (
+              <button type="button" className="mim-start-btn mim-start-btn-inline" onClick={liveState.start}>
+                Tentar novamente
+              </button>
+            )}
           </div>
         </div>
       )}
 
-      {mapData && (
+      {panelVisible && (
         <div className="mim-panel">
           <h1>{title}</h1>
           <div className="mim-sub">
@@ -253,6 +309,7 @@ export function MaringaImoveisMap({
               type="button"
               className={`mim-btn${viewMode === 'pontos' ? ' is-active' : ''}`}
               onClick={() => setViewMode('pontos')}
+              disabled={!mapData?.records.length}
             >
               Pontos
             </button>
@@ -260,6 +317,7 @@ export function MaringaImoveisMap({
               type="button"
               className={`mim-btn${viewMode === 'calor' ? ' is-active' : ''}`}
               onClick={() => setViewMode('calor')}
+              disabled={!mapData?.records.length}
             >
               Mapa de calor
             </button>
@@ -312,19 +370,23 @@ export function MaringaImoveisMap({
             </button>
           </div>
 
-          <div className="mim-sec">Tipo</div>
-          <div className="mim-chips">
-            {propertyTypes.map((type) => (
-              <label key={type} className="mim-chip">
-                <input
-                  type="checkbox"
-                  checked={selectedTypes.has(type)}
-                  onChange={(event) => toggleType(type, event.target.checked)}
-                />
-                {type}
-              </label>
-            ))}
-          </div>
+          {propertyTypes.length > 0 && (
+            <>
+              <div className="mim-sec">Tipo</div>
+              <div className="mim-chips">
+                {propertyTypes.map((type) => (
+                  <label key={type} className="mim-chip">
+                    <input
+                      type="checkbox"
+                      checked={selectedTypes.has(type)}
+                      onChange={(event) => toggleType(type, event.target.checked)}
+                    />
+                    {type}
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="mim-sec">Dormitórios</div>
           <div className="mim-chips">
@@ -417,8 +479,8 @@ export function MaringaImoveisMap({
                 <span>{legend.maxLabel}</span>
               </div>
               <div className="mim-footnote">
-                Fontes: sub100.com.br (coletado automaticamente). Preços são de{' '}
-                <b>anúncio</b> (oferta), não de venda efetiva.
+                Fontes: sub100.com.br (coletado ao vivo). Preços são de <b>anúncio</b> (oferta),
+                não de venda efetiva.
               </div>
             </div>
           )}

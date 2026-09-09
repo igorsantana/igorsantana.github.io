@@ -3,7 +3,17 @@
 Mapa interativo com imóveis residenciais à venda em Maringá (PR).
 
 - **Produção:** https://igorsantana.github.io/maringa-imoveis/
-- **Stack:** React + Leaflet, dados embutidos no bundle (sem fetch de JSON em runtime)
+- **Stack:** React + Leaflet + OpenStreetMap
+- **Dados:** busca ao vivo no SUB100 (sem arquivos JSON)
+
+## Como funciona
+
+1. Abra o mapa — basemap OpenStreetMap (sem API key).
+2. Clique em **Carregar imóveis** para iniciar a busca.
+3. Os pontos aparecem progressivamente enquanto as páginas da API são carregadas.
+
+A API do SUB100 exige proxy CORS. Produção usa:
+`https://maringa-imoveis-api.vercel.app/api`
 
 ## Desenvolvimento
 
@@ -11,16 +21,7 @@ Mapa interativo com imóveis residenciais à venda em Maringá (PR).
 cd demo
 npm install
 npm run dev
-# abre http://localhost:5173
-```
-
-Para testar o build de produção localmente:
-
-```bash
-cd demo
-npm run build
-npm run serve
-# abre http://localhost:4173
+# http://localhost:5173 — proxy local em /api
 ```
 
 ## Build para GitHub Pages
@@ -31,25 +32,26 @@ npm install
 npm run build
 ```
 
-O build gera `index.html` e `assets/` na pasta `maringa-imoveis/` (raiz do site).
+Gera `index.html` e `assets/` na pasta `maringa-imoveis/`.
 
 ## Estrutura
 
 | Pasta | Descrição |
 | --- | --- |
-| `demo/` | App Vite (fonte da página publicada) |
-| `demo/src/map-data.json` | Dados do mapa (importados no bundle) |
-| `component/` | Componente React reutilizável (`MaringaImoveisMap`) |
+| `demo/` | App Vite publicado no GitHub Pages |
+| `demo/api/` | Proxy Vercel para a API SUB100 |
+| `component/` | Componente React reutilizável |
+| `proxy/` | Cloudflare Worker alternativo (opcional) |
 
 ## Componente React
 
-Passe `data` (bundled) ou `dataUrl` (fetch remoto):
-
 ```tsx
 import { MaringaImoveisMap } from '@maringa-imoveis-map/MaringaImoveisMap';
-import mapData from './map-data.json';
 
-<MaringaImoveisMap data={mapData} height="80vh" />
+<MaringaImoveisMap
+  liveFetch
+  manualStart
+  apiBase="https://maringa-imoveis-api.vercel.app/api"
+  height="80vh"
+/>
 ```
-
-Veja `component/README.md` para integração em outros projetos.

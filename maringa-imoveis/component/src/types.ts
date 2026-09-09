@@ -32,6 +32,12 @@ export interface MaringaImoveisMapProps {
   data?: MapData;
   /** URL to fetch map data (alternative to `data`) */
   dataUrl?: string;
+  /** Fetch listings live from SUB100 API */
+  liveFetch?: boolean;
+  /** API base URL (defaults to `/api/sub100` — use Vite proxy locally) */
+  apiBase?: string;
+  /** Wait for user action before fetching (default: true with `liveFetch`) */
+  manualStart?: boolean;
   className?: string;
   style?: CSSProperties;
   /** Map container height (default: 100%) */
