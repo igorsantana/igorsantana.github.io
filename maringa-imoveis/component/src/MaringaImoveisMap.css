@@ -1,0 +1,254 @@
+.mim-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #222;
+}
+
+.mim-map {
+  width: 100%;
+  height: 100%;
+}
+
+.mim-panel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  width: 300px;
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  padding: 16px 16px 12px;
+  font-size: 13px;
+}
+
+.mim-panel h1 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+
+.mim-sub {
+  color: #666;
+  font-size: 11.5px;
+  margin-bottom: 12px;
+}
+
+.mim-sec {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+  margin: 10px 0 5px;
+}
+
+.mim-btn-group {
+  display: flex;
+  gap: 6px;
+}
+
+.mim-btn {
+  flex: 1;
+  text-align: center;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 8px;
+  background: #f0f0f0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+  color: inherit;
+}
+
+.mim-btn.is-active {
+  background: #1a6fb5;
+  color: #fff;
+}
+
+.mim-select,
+.mim-input {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 12.5px;
+  margin-top: 3px;
+  background: #fff;
+}
+
+.mim-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.mim-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.mim-price-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.mim-price-row .mim-input {
+  width: 50%;
+}
+
+.mim-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mim-stat {
+  flex: 1;
+  background: #f6f8fa;
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.mim-stat b {
+  display: block;
+  font-size: 14px;
+}
+
+.mim-stat span {
+  font-size: 10px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mim-legend {
+  margin-top: 10px;
+}
+
+.mim-legend .grad {
+  height: 12px;
+  border-radius: 6px;
+}
+
+.mim-legend .labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #555;
+  margin-top: 2px;
+}
+
+.mim-legend .lbl {
+  font-size: 10.5px;
+  color: #555;
+  margin: 4px 0 2px;
+  font-weight: 600;
+}
+
+.mim-footnote {
+  font-size: 10px;
+  color: #888;
+  margin-top: 6px;
+}
+
+.mim-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 24px;
+}
+
+.mim-loader-card {
+  width: min(360px, 100%);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 18px;
+}
+
+.mim-loader-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.mim-loader-sub {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.mim-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  overflow: hidden;
+}
+
+.mim-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1a6fb5, #4aa3e0);
+  transition: width 0.15s ease;
+}
+
+.mim-progress-label {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #555;
+  text-align: right;
+}
+
+.mim-error {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #b42318;
+  text-align: center;
+}
+
+.mim-root a {
+  color: #1a6fb5;
+}
+
+.mim-root .leaflet-popup-content {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.mim-root .leaflet-popup-content b {
+  color: #0b3d66;
+}
+
+@media (max-width: 700px) {
+  .mim-panel {
+    width: 92%;
+    max-height: 60%;
+  }
+}

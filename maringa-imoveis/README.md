@@ -1,46 +1,45 @@
 # Imóveis em Maringá - PR
 
-Mapa interativo com imóveis residenciais à venda em Maringá (PR) e dados de transações imobiliárias (DOI/ONR).
+Mapa interativo com imóveis residenciais à venda em Maringá (PR).
 
-- Acesse o mapa: https://igorsantana.github.io/maringa-imoveis/
-- Dados de transações (DOI/ONR): `doi_maringa.csv` / `doi_maringa.geojson`
-- Imóveis residenciais à venda: `maringa_residencial_limpo.csv` / `maringa_residencial_limpo.geojson`
+- **Produção:** https://igorsantana.github.io/maringa-imoveis/
+- **Stack:** React + Leaflet, dados embutidos no bundle (sem fetch de JSON em runtime)
 
-## Dados
+## Desenvolvimento
 
-### `doi_maringa` — Transações imobiliárias (ONR/DOI)
+```bash
+cd demo
+npm install
+npm run dev
+```
 
-Registros de transações imobiliárias (Declaração de Operação Imobiliária) para o município de Maringá (IBGE 4115200), extraídos da camada pública do [Mapa do Registro de Imóveis (ONR)](https://mapa.onr.org.br).
+## Build para GitHub Pages
 
-| Campo | Descrição |
+```bash
+cd demo
+npm install
+npm run build
+```
+
+O build gera `index.html` e `assets/` na pasta `maringa-imoveis/` (raiz do site).
+
+## Estrutura
+
+| Pasta | Descrição |
 | --- | --- |
-| `objectid` | Identificador interno da camada |
-| `id` | Identificador da transação |
-| `hash` | Hash do registro |
-| `matricula` | Número da matrícula |
-| `cnm` | Código Nacional de Matrícula |
-| `cns` | Código Nacional de Serventia |
-| `municipio_cod_ibge` | Código IBGE do município |
-| `lon` / `lat` | Coordenadas do imóvel |
+| `demo/` | App Vite (fonte da página publicada) |
+| `demo/src/map-data.json` | Dados do mapa (importados no bundle) |
+| `component/` | Componente React reutilizável (`MaringaImoveisMap`) |
 
-### `maringa_residencial_limpo` — Imóveis residenciais à venda
+## Componente React
 
-Anúncios de imóveis residenciais à venda em Maringá (fontes públicas de portais imobiliários).
+Passe `data` (bundled) ou `dataUrl` (fetch remoto):
 
-| Campo | Descrição |
-| --- | --- |
-| `reference` / `id` | Referência do anúncio |
-| `type` | Tipo (Apartamento, Casa, etc.) |
-| `business` | Natureza (Venda) |
-| `price` / `price_num` | Preço (formatado / numérico) |
-| `price_m2` | Preço por m² |
-| `area_m2` / `private_area` / `total_area` / `land_area` | Áreas |
-| `dorms`, `suites`, `bathrooms`, `parking`, `floor` | Características |
-| `address_complete` / `street` / `number` / `neighborhood` | Endereço |
-| `latitude` / `longitude` | Coordenadas |
-| `advertiser` | Anunciante |
-| `url` | Link do anúncio |
+```tsx
+import { MaringaImoveisMap } from '@maringa-imoveis-map/MaringaImoveisMap';
+import mapData from './map-data.json';
 
-## Observação
+<MaringaImoveisMap data={mapData} height="80vh" />
+```
 
-Os dados de transações são divulgados de forma pública pela plataforma ONR (Operador Nacional do Sistema de Registro Eletrônico de Imóveis). Consulte os [Termos de Uso do Mapa ONR](https://mapa.onr.org.br/sigri/termo-de-uso).
+Veja `component/README.md` para integração em outros projetos.

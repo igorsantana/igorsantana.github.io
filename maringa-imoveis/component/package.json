@@ -1,0 +1,29 @@
+{
+  "name": "@igorsantana/maringa-imoveis-map",
+  "version": "1.0.0",
+  "description": "React map component for Maringá residential listings with heatmap and filters",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/MaringaImoveisMap.css"
+  },
+  "peerDependencies": {
+    "leaflet": "^1.9.4",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "leaflet.heat": "^0.2.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.20",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "typescript": "^5.9.2"
+  }
+}
