@@ -1,7 +1,8 @@
+import { sanitizeMapData } from './mapDataBuilder';
 import type { MapData, MapRecord } from './types';
 
 const STORAGE_KEY = 'maringa-imoveis-map-data';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 interface StoredPayload {
   v: number;
@@ -38,10 +39,10 @@ export function loadCachedMapData(): MapData | null {
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as StoredPayload;
-    if (parsed.v !== STORAGE_VERSION || !isMapData(parsed.data)) return null;
+    if (![1, STORAGE_VERSION].includes(parsed.v) || !isMapData(parsed.data)) return null;
     if (!parsed.data.records.length) return null;
 
-    return parsed.data;
+    return sanitizeMapData(parsed.data);
   } catch {
     return null;
   }
@@ -54,7 +55,7 @@ export function saveCachedMapData(data: MapData): void {
     const payload: StoredPayload = {
       v: STORAGE_VERSION,
       savedAt: new Date().toISOString(),
-      data,
+      data: sanitizeMapData(data),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch {

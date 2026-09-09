@@ -27,6 +27,10 @@ export function fmtBRL(value: number) {
   })}`;
 }
 
+export function fmtPm2(value: number) {
+  return `R$ ${Math.round(value).toLocaleString('pt-BR')}`;
+}
+
 export function binFor(value: number, breaks: number[]) {
   for (let i = 0; i < breaks.length - 1; i += 1) {
     if (value <= breaks[i + 1]) return i;
@@ -76,8 +80,8 @@ export function popupHtml(rec: MapRecord) {
     rec;
   let html = `<b>${type}</b><br>`;
   html += `Preço: <b>${fmtBRL(price)}</b>`;
-  if (priceM2) {
-    html += ` <span style="color:#777">(${Math.round(priceM2).toLocaleString('pt-BR')} R$/m²)</span>`;
+  if (priceM2 != null) {
+    html += ` <span style="color:#777">(${fmtPm2(priceM2)}/m²)</span>`;
   }
   html += '<br>';
   if (area) html += `Área: ${area} m²<br>`;
@@ -192,12 +196,12 @@ export function buildLegend(
   const gradient = `linear-gradient(to right, ${COLOR_SCALE.map((c) => c.c).join(',')})`;
   const minLabel =
     metric === 'preco'
-      ? `R$ ${Math.round(breaks[0]).toLocaleString('pt-BR')}`
-      : `R$ ${breaks[0]}`;
+      ? fmtBRL(breaks[0])
+      : fmtPm2(breaks[0]);
   const maxLabel =
     metric === 'preco'
-      ? `R$ ${Math.round(breaks[breaks.length - 1]).toLocaleString('pt-BR')}`
-      : `R$ ${breaks[breaks.length - 1]}`;
+      ? fmtBRL(breaks[breaks.length - 1])
+      : fmtPm2(breaks[breaks.length - 1]);
 
   return { title, gradient, minLabel, maxLabel };
 }
