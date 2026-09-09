@@ -33,6 +33,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@maringa-imoveis-map': path.resolve(siteRoot, 'component/src'),
+      // Single React instance — component/ has its own node_modules for typecheck only.
+      react: path.resolve(demoDir, 'node_modules/react'),
+      'react-dom': path.resolve(demoDir, 'node_modules/react-dom'),
     },
+    dedupe: ['react', 'react-dom'],
   },
 });
