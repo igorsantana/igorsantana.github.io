@@ -1,3 +1,0 @@
-name = "maringa-imoveis-sub100-proxy"
-main = "worker.js"
-compatibility_date = "2024-01-01"
