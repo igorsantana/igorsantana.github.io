@@ -8,7 +8,8 @@ const siteRoot = path.resolve(demoDir, '..');
 
 export default defineConfig({
   plugins: [react()],
-  base: '/maringa-imoveis/',
+  // Relative paths work on GitHub Pages subpaths and local static servers.
+  base: './',
   build: {
     outDir: 'dist',
     emptyDir: true,

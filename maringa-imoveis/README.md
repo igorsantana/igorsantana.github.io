@@ -11,6 +11,16 @@ Mapa interativo com imóveis residenciais à venda em Maringá (PR).
 cd demo
 npm install
 npm run dev
+# abre http://localhost:5173
+```
+
+Para testar o build de produção localmente:
+
+```bash
+cd demo
+npm run build
+npm run serve
+# abre http://localhost:4173
 ```
 
 ## Build para GitHub Pages

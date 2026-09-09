@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/sync-site.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve": "vite preview --host"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
