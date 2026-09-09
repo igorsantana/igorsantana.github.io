@@ -234,8 +234,9 @@ export function MaringaImoveisMap({
 
   const progressPct = Math.round(loadState.progress * 100);
   const isLoading = loadState.status === 'loading' || loadState.status === 'parsing';
-  const showStart =
-    waitForStart && !liveState.started && loadState.status !== 'error';
+  const showStart = waitForStart && loadState.status === 'idle';
+  const canRefreshLive =
+    liveFetch && mapData?.records.length && loadState.status === 'ready' && !isLoading;
   const loadingLabel = liveFetch
     ? `Carregando imóveis… ${liveState.loadedPages}/${liveState.totalPages || '?'} páginas`
     : loadState.status === 'parsing'
@@ -301,6 +302,19 @@ export function MaringaImoveisMap({
           <h1>{title}</h1>
           <div className="mim-sub">
             {subtitle} · <b>{stats.count}</b> imóveis residenciais (casa/apartamento)
+            {canRefreshLive && (
+              <>
+                {' '}
+                ·{' '}
+                <button
+                  type="button"
+                  className="mim-link-btn"
+                  onClick={liveState.start}
+                >
+                  Atualizar dados
+                </button>
+              </>
+            )}
           </div>
 
           <div className="mim-sec">Visualização</div>

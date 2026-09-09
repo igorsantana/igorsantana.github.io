@@ -39,6 +39,21 @@
   margin-bottom: 12px;
 }
 
+.mim-link-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #1a6fb5;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.mim-link-btn:hover {
+  color: #125a96;
+}
+
 .mim-sec {
   font-weight: 600;
   font-size: 11px;

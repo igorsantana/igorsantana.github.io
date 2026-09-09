@@ -4,8 +4,11 @@ import {
   createEmptyMapData,
   propertyToRecord,
 } from './mapDataBuilder';
+import { loadCachedMapData, saveCachedMapData } from './mapDataCache';
 import { fetchSub100Page } from './sub100Api';
 import type { LoadState, MapData, MapRecord } from './types';
+
+const cachedOnMount = loadCachedMapData();
 
 const PAGE_BATCH_SIZE = 4;
 
@@ -26,17 +29,21 @@ export function useSub100LiveLoader(
   options: Sub100LiveLoaderOptions = {}
 ): Sub100LiveLoaderState {
   const [state, setState] = useState<Omit<Sub100LiveLoaderState, 'start' | 'cancel'>>({
-    status: 'idle',
-    progress: 0,
+    status: cachedOnMount ? 'ready' : 'idle',
+    progress: cachedOnMount ? 1 : 0,
     error: null,
-    data: null,
+    data: cachedOnMount,
     started: false,
     loadedPages: 0,
     totalPages: 0,
   });
 
   const runIdRef = useRef(0);
-  const dataRef = useRef<MapData>(createEmptyMapData());
+  const dataRef = useRef<MapData>(cachedOnMount ?? createEmptyMapData());
+
+  const persistData = useCallback((data: MapData) => {
+    saveCachedMapData(data);
+  }, []);
 
   const cancel = useCallback(() => {
     runIdRef.current += 1;
@@ -74,6 +81,7 @@ export function useSub100LiveLoader(
           .filter((rec): rec is MapRecord => rec != null);
 
         dataRef.current = appendRecords(dataRef.current, firstBatch);
+        persistData(dataRef.current);
         options.onBatch?.(dataRef.current, firstBatch);
 
         setState((prev) => ({
@@ -107,6 +115,7 @@ export function useSub100LiveLoader(
             .filter((rec): rec is MapRecord => rec != null);
 
           dataRef.current = appendRecords(dataRef.current, batch);
+          persistData(dataRef.current);
           options.onBatch?.(dataRef.current, batch);
 
           const loadedPages = Math.min(page + PAGE_BATCH_SIZE - 1, totalPages);
@@ -121,6 +130,8 @@ export function useSub100LiveLoader(
         }
 
         if (runIdRef.current !== runId) return;
+
+        persistData(dataRef.current);
 
         setState((prev) => ({
           ...prev,
@@ -144,7 +155,7 @@ export function useSub100LiveLoader(
     };
 
     void load();
-  }, [options.apiBase, options.onBatch]);
+  }, [options.apiBase, options.onBatch, persistData]);
 
   return {
     ...state,
