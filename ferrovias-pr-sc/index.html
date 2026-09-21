@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Mapa das ferrovias do Paraná e de Santa Catarina">
+    <title>Ferrovias — Paraná e Santa Catarina</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="panel">
+        <a class="back-link" href="../projects.html">← projetos</a>
+        <p class="eyebrow">MAPA FERROVIÁRIO</p>
+        <h1>Paraná &amp; Santa Catarina</h1>
+        <p class="intro">
+          Linhas ferroviárias operacionais, suspensas, históricas e planejadas,
+          com destaque para os principais corredores da região.
+        </p>
+
+        <div class="status" id="status" role="status">Carregando dados…</div>
+
+        <section class="filters" aria-label="Filtros do mapa">
+          <h2>Exibir</h2>
+          <label><input type="checkbox" data-status="operational" checked> Operacionais</label>
+          <label><input type="checkbox" data-status="suspended" checked> Suspensas</label>
+          <label><input type="checkbox" data-status="historical" checked> Históricas</label>
+          <label><input type="checkbox" data-status="planned" checked> Planejadas</label>
+          <label><input type="checkbox" id="official-toggle" checked> Referência ANTT</label>
+        </section>
+
+        <section class="legend" aria-label="Legenda">
+          <h2>Legenda</h2>
+          <div><i class="line-swatch line-swatch--operational"></i> Operacional / carga</div>
+          <div><i class="line-swatch line-swatch--tourist"></i> Turística</div>
+          <div><i class="line-swatch line-swatch--suspended"></i> Suspensa</div>
+          <div><i class="line-swatch line-swatch--historical"></i> Histórica</div>
+          <div><i class="line-swatch line-swatch--planned"></i> Planejada</div>
+          <div><i class="line-swatch line-swatch--official"></i> Base ANTT</div>
+        </section>
+
+        <p class="note">
+          Linhas coloridas usam nomes e tags do OpenStreetMap. A camada cinza é
+          a referência geométrica da ANTT.
+        </p>
+        <p class="sources">
+          Fontes:
+          <a href="https://www.gov.br/transportes/pt-br/assuntos/dados-de-transportes/bit/bit-mapas" target="_blank" rel="noopener">DNIT/Ministério dos Transportes</a>,
+          <a href="https://geopr.iat.pr.gov.br/server/rest/services/00_PUBLICACOES/malha_ferroviaria_antt/MapServer/0" target="_blank" rel="noopener">ANTT</a> e
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+        </p>
+      </aside>
+      <div id="map" aria-label="Mapa das ferrovias do Paraná e Santa Catarina"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
