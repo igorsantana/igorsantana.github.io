@@ -62,6 +62,7 @@ export function sanitizeMapRecord(rec: MapRecord): MapRecord {
     number,
     reference,
     url,
+    photos,
   ] = rec;
   const cleanArea = sanitizeArea(area, type);
   const cleanPriceM2 = computePriceM2(price, cleanArea);
@@ -79,6 +80,7 @@ export function sanitizeMapRecord(rec: MapRecord): MapRecord {
     number,
     reference,
     url,
+    Array.isArray(photos) ? photos : [],
   ];
 }
 
@@ -106,6 +108,9 @@ export interface Sub100Property {
   total: string;
   private_area?: string | number | null;
   total_area?: string | number | null;
+  media?: {
+    photo?: Array<{ url?: string | null }>;
+  };
   dorms?: number | null;
   address?: {
     neighborhood?: string;
@@ -147,6 +152,9 @@ export function propertyToRecord(property: Sub100Property): MapRecord | null {
     number,
     property.reference,
     url,
+    (property.media?.photo ?? [])
+      .map((photo) => photo.url)
+      .filter((url): url is string => Boolean(url)),
   ];
 }
 

@@ -20,8 +20,13 @@ function copyRecursive(src, dest) {
 }
 
 const siteAssetsDir = path.join(siteRoot, 'assets');
+const siteDataDir = path.join(siteRoot, 'data');
 rmSync(siteAssetsDir, { recursive: true, force: true });
+rmSync(siteDataDir, { recursive: true, force: true });
 cpSync(path.join(distDir, 'index.html'), path.join(siteRoot, 'index.html'));
 copyRecursive(path.join(distDir, 'assets'), siteAssetsDir);
+if (statSync(path.join(distDir, 'data'), { throwIfNoEntry: false })) {
+  copyRecursive(path.join(distDir, 'data'), siteDataDir);
+}
 
 console.log('Synced demo build to', siteRoot);

@@ -10,6 +10,7 @@ export function App() {
       liveFetch
       manualStart
       apiBase={apiBase}
+      neighborhoodBoundariesUrl="./data/bairros-maringa.geojson"
       height="100vh"
       onLoaded={(loaded) => {
         console.info(`Map ready: ${loaded.count} listings`);

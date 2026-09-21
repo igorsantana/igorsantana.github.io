@@ -13,6 +13,7 @@ export type MapRecord = [
   string,
   string,
   string,
+  string[]?,
 ];
 
 export interface MapData {
@@ -38,6 +39,8 @@ export interface MaringaImoveisMapProps {
   apiBase?: string;
   /** Wait for user action before fetching (default: true with `liveFetch`) */
   manualStart?: boolean;
+  /** Official Maringá neighborhood polygons in GeoJSON format */
+  neighborhoodBoundariesUrl?: string;
   className?: string;
   style?: CSSProperties;
   /** Map container height (default: 100%) */

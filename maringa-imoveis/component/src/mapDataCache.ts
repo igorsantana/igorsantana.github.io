@@ -2,7 +2,7 @@ import { sanitizeMapData } from './mapDataBuilder';
 import type { MapData, MapRecord } from './types';
 
 const STORAGE_KEY = 'maringa-imoveis-map-data';
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
 
 interface StoredPayload {
   v: number;
@@ -13,7 +13,7 @@ interface StoredPayload {
 function isMapRecord(value: unknown): value is MapRecord {
   return (
     Array.isArray(value) &&
-    value.length === 12 &&
+    value.length >= 12 &&
     typeof value[0] === 'number' &&
     typeof value[10] === 'string'
   );

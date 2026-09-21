@@ -57,6 +57,7 @@ export function colorFor(
 export interface FilterState {
   selectedTypes: Set<string>;
   neighborhood: string;
+  region: string;
   minDorms: number;
   minPrice: number | null;
   maxPrice: number | null;
@@ -64,9 +65,16 @@ export interface FilterState {
   maxArea: number | null;
 }
 
-export function recMatchesFilter(rec: MapRecord, filters: FilterState) {
+export function recMatchesFilter(
+  rec: MapRecord,
+  filters: FilterState,
+  location = { neighborhood: rec[7], region: '' }
+) {
   if (!filters.selectedTypes.has(rec[4])) return false;
-  if (filters.neighborhood && rec[7] !== filters.neighborhood) return false;
+  if (filters.neighborhood && location.neighborhood !== filters.neighborhood) {
+    return false;
+  }
+  if (filters.region && location.region !== filters.region) return false;
   if (filters.minDorms > 0) {
     const dorms = rec[6];
     if (dorms == null || dorms < filters.minDorms) return false;
@@ -80,7 +88,10 @@ export function recMatchesFilter(rec: MapRecord, filters: FilterState) {
   return true;
 }
 
-export function popupHtml(rec: MapRecord) {
+export function popupHtml(
+  rec: MapRecord,
+  location?: { neighborhood: string; region: string }
+) {
   const [, , price, priceM2, type, area, dorms, neighborhood, street, number, , url] =
     rec;
   let html = `<b>${type}</b><br>`;
@@ -94,7 +105,14 @@ export function popupHtml(rec: MapRecord) {
   if (street || number) {
     html += `Endereço: ${[street, number].filter(Boolean).join(', ')}<br>`;
   }
-  if (neighborhood) html += `Bairro: ${neighborhood}<br>`;
+  if (location) {
+    html += `Bairro: ${location.neighborhood}<br>`;
+    if (location.region !== 'Sem região no guia') {
+      html += `Região: ${location.region}<br>`;
+    }
+  } else if (neighborhood) {
+    html += `Bairro: ${neighborhood}<br>`;
+  }
   if (url) html += `<a href="${url}" target="_blank" rel="noopener noreferrer">Ver anúncio ↗</a>`;
   return html;
 }
