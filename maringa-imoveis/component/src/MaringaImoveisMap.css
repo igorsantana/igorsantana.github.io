@@ -1250,6 +1250,19 @@
   color: var(--mim-accent);
 }
 
+.mim-stat {
+  background: var(--mim-bg-soft);
+  border: 1px solid var(--mim-border);
+}
+
+.mim-stat b {
+  color: var(--mim-text);
+}
+
+.mim-stat span {
+  color: var(--mim-muted);
+}
+
 .mim-report-btn,
 .mim-refresh-btn {
   border-color: var(--mim-accent);
