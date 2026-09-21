@@ -105,6 +105,7 @@ export interface Sub100Property {
   longitude: string | number;
   total: string;
   private_area?: string | number | null;
+  total_area?: string | number | null;
   dorms?: number | null;
   address?: {
     neighborhood?: string;
@@ -124,7 +125,9 @@ export function propertyToRecord(property: Sub100Property): MapRecord | null {
     return null;
   }
 
-  const area = sanitizeArea(parseArea(property.private_area), type);
+  const privateArea = sanitizeArea(parseArea(property.private_area), type);
+  const totalArea = sanitizeArea(parseArea(property.total_area), type);
+  const area = privateArea ?? totalArea;
   const priceM2 = computePriceM2(price, area);
   const neighborhood = property.address?.neighborhood ?? '';
   const street = property.address?.street ?? '';

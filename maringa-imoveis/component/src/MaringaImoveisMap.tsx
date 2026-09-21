@@ -8,6 +8,7 @@ import {
   buildLegend,
   colorFor,
   fmtBRL,
+  fmtPm2,
   median,
   parsePriceInput,
   popupHtml,
@@ -28,6 +29,78 @@ const DEFAULT_CENTER: [number, number] = [-23.43, -51.95];
 const DEFAULT_ZOOM = 12;
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+type PriceM2ReportRow = {
+  neighborhood: string;
+  apartment: number[];
+  house: number[];
+  combined: number[];
+};
+
+function buildPriceM2Report(records: MapRecord[]): PriceM2ReportRow[] {
+  const grouped = new Map<string, PriceM2ReportRow>();
+
+  for (const record of records) {
+    const priceM2 = record[3];
+    if (priceM2 == null || !['Apartamento', 'Casa'].includes(record[4])) continue;
+
+    const neighborhood = record[7].trim() || 'Sem bairro informado';
+    const row = grouped.get(neighborhood) ?? {
+      neighborhood,
+      apartment: [],
+      house: [],
+      combined: [],
+    };
+
+    if (record[4] === 'Apartamento') row.apartment.push(priceM2);
+    if (record[4] === 'Casa') row.house.push(priceM2);
+    row.combined.push(priceM2);
+    grouped.set(neighborhood, row);
+  }
+
+  return [...grouped.values()].sort((a, b) =>
+    a.neighborhood.localeCompare(b.neighborhood, 'pt-BR')
+  );
+}
+
+function formatReportValue(values: number[]) {
+  return values.length ? fmtPm2(median(values) as number) : '—';
+}
+
+function downloadPriceM2Report(rows: PriceM2ReportRow[]) {
+  const header = [
+    'Bairro',
+    'Apartamentos - mediana R$/m²',
+    'Apartamentos - anúncios',
+    'Casas - mediana R$/m²',
+    'Casas - anúncios',
+    'Combinado - mediana R$/m²',
+    'Combinado - anúncios',
+  ];
+  const lines = rows.map((row) => [
+    row.neighborhood,
+    median(row.apartment) ?? '',
+    row.apartment.length,
+    median(row.house) ?? '',
+    row.house.length,
+    median(row.combined) ?? '',
+    row.combined.length,
+  ]);
+  const csv = [header, ...lines]
+    .map((line) =>
+      line
+        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+        .join(';')
+    )
+    .join('\r\n');
+  const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'relatorio-preco-m2-por-bairro.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export function MaringaImoveisMap({
   data,
@@ -82,6 +155,7 @@ export function MaringaImoveisMap({
   const [viewMode, setViewMode] = useState<ViewMode>('pontos');
   const [metric, setMetric] = useState<MetricMode>('preco');
   const [heatWeight, setHeatWeight] = useState<HeatWeight>('densidade');
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     if (!mapData || !propertyTypes.length) return;
@@ -174,6 +248,11 @@ export function MaringaImoveisMap({
       medianPriceM2: median(pricesM2),
     };
   }, [filtered]);
+
+  const priceM2Report = useMemo(
+    () => buildPriceM2Report(mapData?.records ?? []),
+    [mapData]
+  );
 
   const legend = useMemo(() => {
     if (!mapData || !mapData.records.length) return null;
@@ -487,6 +566,16 @@ export function MaringaImoveisMap({
             />
           </div>
 
+          <button
+            type="button"
+            className="mim-report-btn"
+            onClick={() => setReportOpen(true)}
+            disabled={!mapData?.records.length}
+          >
+            <span aria-hidden="true">▤</span>
+            Gerar relatório de R$/m² por bairro
+          </button>
+
           <div className="mim-stats">
             <div className="mim-stat">
               <b>{stats.count}</b>
@@ -530,6 +619,79 @@ export function MaringaImoveisMap({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {reportOpen && (
+        <div className="mim-report-backdrop" role="presentation">
+          <section
+            className="mim-report"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mim-report-title"
+          >
+            <div className="mim-report-header">
+              <div>
+                <div className="mim-sec">Relatório</div>
+                <h2 id="mim-report-title">Preço mediano por m² e bairro</h2>
+                <p>
+                  Apartamentos, casas e combinado. Anúncios sem área válida não
+                  entram no cálculo.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="mim-report-close"
+                onClick={() => setReportOpen(false)}
+                aria-label="Fechar relatório"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mim-report-actions">
+              <span>{priceM2Report.length} bairros</span>
+              <button
+                type="button"
+                className="mim-report-download"
+                onClick={() => downloadPriceM2Report(priceM2Report)}
+              >
+                Baixar CSV
+              </button>
+            </div>
+
+            <div className="mim-report-table-wrap">
+              <table className="mim-report-table">
+                <thead>
+                  <tr>
+                    <th>Bairro</th>
+                    <th>Apartamentos</th>
+                    <th>Casas</th>
+                    <th>Combinado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {priceM2Report.map((row) => (
+                    <tr key={row.neighborhood}>
+                      <th scope="row">{row.neighborhood}</th>
+                      <td>
+                        <b>{formatReportValue(row.apartment)}</b>
+                        <small>{row.apartment.length} anúncios</small>
+                      </td>
+                      <td>
+                        <b>{formatReportValue(row.house)}</b>
+                        <small>{row.house.length} anúncios</small>
+                      </td>
+                      <td>
+                        <b>{formatReportValue(row.combined)}</b>
+                        <small>{row.combined.length} anúncios</small>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       )}
     </div>

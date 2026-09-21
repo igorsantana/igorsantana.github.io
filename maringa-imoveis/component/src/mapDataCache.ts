@@ -2,7 +2,7 @@ import { sanitizeMapData } from './mapDataBuilder';
 import type { MapData, MapRecord } from './types';
 
 const STORAGE_KEY = 'maringa-imoveis-map-data';
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
 interface StoredPayload {
   v: number;
@@ -39,7 +39,7 @@ export function loadCachedMapData(): MapData | null {
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as StoredPayload;
-    if (![1, STORAGE_VERSION].includes(parsed.v) || !isMapData(parsed.data)) return null;
+    if (parsed.v !== STORAGE_VERSION || !isMapData(parsed.data)) return null;
     if (!parsed.data.records.length) return null;
 
     return sanitizeMapData(parsed.data);
