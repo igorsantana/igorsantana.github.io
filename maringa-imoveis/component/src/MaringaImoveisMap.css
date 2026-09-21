@@ -861,6 +861,37 @@
   font-size: 10px;
 }
 
+.mim-report-sort-direction,
+.mim-report-region-filter button {
+  padding: 4px 7px;
+  border: 1px solid #d5dde6;
+  border-radius: 5px;
+  background: #f5f7f9;
+  color: #555;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+
+.mim-report-sort-direction:hover,
+.mim-report-region-filter button:hover,
+.mim-report-region-filter button.is-active {
+  border-color: #1a6fb5;
+  background: #1a6fb5;
+  color: #fff;
+}
+
+.mim-report-region-filter {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mim-report-region-filter span {
+  margin-right: 2px;
+}
+
 .mim-report-scale {
   display: inline-flex;
   align-items: center;
@@ -1196,6 +1227,21 @@
 .mim-report-sort select {
   border-color: var(--mim-border);
   background: var(--mim-bg-soft);
+  color: var(--mim-text);
+}
+
+.mim-report-sort-direction,
+.mim-report-region-filter button {
+  border-color: var(--mim-border);
+  background: var(--mim-bg-soft);
+  color: var(--mim-muted);
+}
+
+.mim-report-sort-direction:hover,
+.mim-report-region-filter button:hover,
+.mim-report-region-filter button.is-active {
+  border-color: var(--mim-accent);
+  background: #203957;
   color: var(--mim-text);
 }
 

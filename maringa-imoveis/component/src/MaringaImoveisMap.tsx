@@ -253,6 +253,10 @@ export function MaringaImoveisMap({
   const mapData = loadState.data;
   const waitForStart = liveFetch && (manualStart ?? true);
   const [boundaries, setBoundaries] = useState<NeighborhoodCollection | null>(null);
+  const boundaryViewBeforeSelectionRef = useRef<{
+    center: L.LatLngExpression;
+    zoom: number;
+  } | null>(null);
   const [boundaryStatus, setBoundaryStatus] = useState<
     'idle' | 'loading' | 'ready' | 'error'
   >(neighborhoodBoundariesUrl ? 'loading' : 'idle');
@@ -317,6 +321,10 @@ export function MaringaImoveisMap({
   const [reportSort, setReportSort] = useState<
     'neighborhood' | 'apartment' | 'house' | 'combined'
   >('neighborhood');
+  const [reportSortDirection, setReportSortDirection] = useState<'asc' | 'desc'>(
+    'desc'
+  );
+  const [reportRegion, setReportRegion] = useState('');
   const boundaryColors = useMemo(
     () => (boundaries ? buildBoundaryColors(boundaries) : null),
     [boundaries]
@@ -360,38 +368,6 @@ export function MaringaImoveisMap({
     []
   );
 
-  const selectedNeighborhoodRecords = useMemo(
-    () =>
-      mapData?.records.filter(
-        (record) =>
-          selectedNeighborhoodPanel &&
-          recordLocations.get(record[10])?.neighborhood ===
-            selectedNeighborhoodPanel
-      ) ?? [],
-    [mapData, recordLocations, selectedNeighborhoodPanel]
-  );
-
-  const selectedNeighborhoodReport = useMemo(() => {
-    if (!selectedNeighborhoodPanel) return null;
-    return (
-      buildPriceM2Report(selectedNeighborhoodRecords, recordLocations).find(
-        (row) => row.neighborhood === selectedNeighborhoodPanel
-      ) ?? null
-    );
-  }, [recordLocations, selectedNeighborhoodPanel, selectedNeighborhoodRecords]);
-
-  const sortedNeighborhoodRecords = useMemo(
-    () =>
-      [...selectedNeighborhoodRecords].sort((a, b) => {
-        const aValue = propertyPanelSort === 'price' ? a[2] : a[3] ?? -1;
-        const bValue = propertyPanelSort === 'price' ? b[2] : b[3] ?? -1;
-        return propertyPanelSortDirection === 'desc'
-          ? bValue - aValue
-          : aValue - bValue;
-      }),
-    [propertyPanelSort, propertyPanelSortDirection, selectedNeighborhoodRecords]
-  );
-
   const changePropertyPanelSort = (sort: 'price' | 'pm2') => {
     if (sort === propertyPanelSort) {
       setPropertyPanelSortDirection((direction) =>
@@ -402,36 +378,6 @@ export function MaringaImoveisMap({
     setPropertyPanelSort(sort);
     setPropertyPanelSortDirection('desc');
   };
-
-  const visibleNeighborhoodRecords = useMemo(
-    () =>
-      sortedNeighborhoodRecords.slice(0, visiblePropertyCount),
-    [sortedNeighborhoodRecords, visiblePropertyCount]
-  );
-
-  useEffect(() => {
-    setVisiblePropertyCount(PROPERTY_PAGE_SIZE);
-  }, [propertyPanelSort, propertyPanelSortDirection, selectedNeighborhoodPanel]);
-
-  useEffect(() => {
-    const root = propertyGridRef.current;
-    const target = propertyLoadMoreRef.current;
-    if (!root || !target || visiblePropertyCount >= sortedNeighborhoodRecords.length) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setVisiblePropertyCount((count) =>
-          Math.min(count + PROPERTY_PAGE_SIZE, sortedNeighborhoodRecords.length)
-        );
-      },
-      { root, rootMargin: '160px' }
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [sortedNeighborhoodRecords.length, visiblePropertyCount]);
 
   useEffect(() => {
     if (!mapData || !propertyTypes.length) return;
@@ -498,16 +444,32 @@ export function MaringaImoveisMap({
     const layer = L.geoJSON(
       boundaries as unknown as GeoJSON.GeoJsonObject,
       {
-        style: (feature) => ({
-          color: '#ffffff',
-          weight: 1.2,
-          opacity: 0.85,
-          fillColor:
-            boundaryColors?.get(
-              feature as NeighborhoodCollection['features'][number]
-            ) ?? '#8bbcff',
-          fillOpacity: 0.32,
-        }),
+        style: (feature) => {
+          const typedFeature = feature as
+            | NeighborhoodCollection['features'][number]
+            | undefined;
+          const featureName = displayNeighborhoodName(
+            String(typedFeature?.properties?.NOME ?? '')
+          );
+          const isOther =
+            Boolean(selectedNeighborhoodPanel) &&
+            featureName !== selectedNeighborhoodPanel;
+          return {
+            color: isOther ? '#68758a' : '#ffffff',
+            weight: selectedNeighborhoodPanel ? 1 : 1.2,
+            opacity: selectedNeighborhoodPanel ? 0.45 : 0.85,
+            fillColor: isOther
+              ? '#38475b'
+              : typedFeature
+                ? boundaryColors?.get(typedFeature) ?? '#8bbcff'
+                : '#8bbcff',
+            fillOpacity: selectedNeighborhoodPanel
+              ? isOther
+                ? 0.18
+                : 0.48
+              : 0.32,
+          };
+        },
         onEachFeature: (feature, featureLayer) => {
           const name = feature.properties?.NOME;
           if (name) {
@@ -519,9 +481,26 @@ export function MaringaImoveisMap({
                   normalizeNeighborhoodName(displayName)
               )?.neighborhood ?? displayName;
             featureLayer.bindTooltip(canonicalName, { sticky: true });
-            featureLayer.on('click', () =>
-              setSelectedNeighborhoodPanel(canonicalName)
-            );
+            featureLayer.on('click', () => {
+              const map = mapInstanceRef.current;
+              if (!map) return;
+              if (selectedNeighborhoodPanel === canonicalName) {
+                setSelectedNeighborhoodPanel('');
+                const previous = boundaryViewBeforeSelectionRef.current;
+                if (previous) map.setView(previous.center, previous.zoom);
+                boundaryViewBeforeSelectionRef.current = null;
+                return;
+              }
+              if (!boundaryViewBeforeSelectionRef.current) {
+                boundaryViewBeforeSelectionRef.current = {
+                  center: map.getCenter(),
+                  zoom: map.getZoom(),
+                };
+              }
+              setSelectedNeighborhoodPanel(canonicalName);
+              const bounds = (featureLayer as L.Polygon).getBounds();
+              if (bounds.isValid()) map.fitBounds(bounds, { padding: [30, 30] });
+            });
           }
         },
       }
@@ -534,7 +513,12 @@ export function MaringaImoveisMap({
         boundaryLayerRef.current = null;
       }
     };
-  }, [boundaries, boundaryColors, recordLocations]);
+  }, [
+    boundaries,
+    boundaryColors,
+    recordLocations,
+    selectedNeighborhoodPanel,
+  ]);
 
   const filters = useMemo(
     () => ({
@@ -566,6 +550,71 @@ export function MaringaImoveisMap({
     );
   }, [mapData, filters, recordLocations]);
 
+  const selectedNeighborhoodRecords = useMemo(
+    () =>
+      filtered.filter(
+        (record) =>
+          selectedNeighborhoodPanel &&
+          recordLocations.get(record[10])?.neighborhood ===
+            selectedNeighborhoodPanel
+      ),
+    [filtered, recordLocations, selectedNeighborhoodPanel]
+  );
+
+  const selectedNeighborhoodReport = useMemo(() => {
+    if (!selectedNeighborhoodPanel) return null;
+    return (
+      buildPriceM2Report(selectedNeighborhoodRecords, recordLocations).find(
+        (row) => row.neighborhood === selectedNeighborhoodPanel
+      ) ?? null
+    );
+  }, [recordLocations, selectedNeighborhoodPanel, selectedNeighborhoodRecords]);
+
+  const sortedNeighborhoodRecords = useMemo(
+    () =>
+      [...selectedNeighborhoodRecords].sort((a, b) => {
+        const aValue = propertyPanelSort === 'price' ? a[2] : a[3] ?? -1;
+        const bValue = propertyPanelSort === 'price' ? b[2] : b[3] ?? -1;
+        return propertyPanelSortDirection === 'desc'
+          ? bValue - aValue
+          : aValue - bValue;
+      }),
+    [propertyPanelSort, propertyPanelSortDirection, selectedNeighborhoodRecords]
+  );
+
+  const visibleNeighborhoodRecords = useMemo(
+    () => sortedNeighborhoodRecords.slice(0, visiblePropertyCount),
+    [sortedNeighborhoodRecords, visiblePropertyCount]
+  );
+
+  useEffect(() => {
+    setVisiblePropertyCount(PROPERTY_PAGE_SIZE);
+  }, [propertyPanelSort, propertyPanelSortDirection, selectedNeighborhoodPanel]);
+
+  useEffect(() => {
+    const root = propertyGridRef.current;
+    const target = propertyLoadMoreRef.current;
+    if (
+      !root ||
+      !target ||
+      visiblePropertyCount >= sortedNeighborhoodRecords.length
+    ) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setVisiblePropertyCount((count) =>
+          Math.min(count + PROPERTY_PAGE_SIZE, sortedNeighborhoodRecords.length)
+        );
+      },
+      { root, rootMargin: '160px' }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [sortedNeighborhoodRecords.length, visiblePropertyCount]);
+
   const stats = useMemo(() => {
     const prices = filtered.map((rec) => rec[2]).sort((a, b) => a - b);
     const pricesM2 = filtered
@@ -581,21 +630,33 @@ export function MaringaImoveisMap({
   }, [filtered]);
 
   const priceM2Report = useMemo(
-    () => buildPriceM2Report(mapData?.records ?? [], recordLocations),
-    [mapData, recordLocations]
+    () =>
+      buildPriceM2Report(
+        filtered.filter(
+          (record) =>
+            !reportRegion ||
+            recordLocations.get(record[10])?.region === reportRegion
+        ),
+        recordLocations
+      ),
+    [filtered, recordLocations, reportRegion]
   );
 
   const sortedPriceM2Report = useMemo(() => {
     const rows = [...priceM2Report];
     if (reportSort === 'neighborhood') {
-      return rows.sort((a, b) =>
-        a.neighborhood.localeCompare(b.neighborhood, 'pt-BR')
-      );
+      return rows.sort((a, b) => {
+        const difference = a.neighborhood.localeCompare(b.neighborhood, 'pt-BR');
+        return reportSortDirection === 'desc' ? difference : -difference;
+      });
     }
-    return rows.sort((a, b) =>
-      (reportMedian(b, reportSort) ?? -1) - (reportMedian(a, reportSort) ?? -1)
-    );
-  }, [priceM2Report, reportSort]);
+    return rows.sort((a, b) => {
+      const difference =
+        (reportMedian(b, reportSort) ?? -1) -
+        (reportMedian(a, reportSort) ?? -1);
+      return reportSortDirection === 'desc' ? difference : -difference;
+    });
+  }, [priceM2Report, reportSort, reportSortDirection]);
 
   const reportPriceValues = useMemo(
     () => ({
@@ -630,6 +691,10 @@ export function MaringaImoveisMap({
       fillOpacity: 0.85,
     })
       .bindPopup(popupHtml(rec, recordLocations.get(rec[10])))
+      .on('click', () => {
+        setSelectedProperty(rec);
+        mapInstanceRef.current?.closePopup();
+      })
       .addTo(group);
   };
 
@@ -693,6 +758,14 @@ export function MaringaImoveisMap({
       : 'Carregando mapa…';
 
   const panelVisible = mapData || liveFetch;
+
+  const closeNeighborhoodPanel = () => {
+    setSelectedNeighborhoodPanel('');
+    const map = mapInstanceRef.current;
+    const previous = boundaryViewBeforeSelectionRef.current;
+    if (map && previous) map.setView(previous.center, previous.zoom);
+    boundaryViewBeforeSelectionRef.current = null;
+  };
 
   const movePhoto = (
     event: MouseEvent<HTMLButtonElement>,
@@ -1094,7 +1167,7 @@ export function MaringaImoveisMap({
             <button
               type="button"
               className="mim-report-close"
-              onClick={() => setSelectedNeighborhoodPanel('')}
+              onClick={closeNeighborhoodPanel}
               aria-label="Fechar imóveis do bairro"
             >
               ×
@@ -1346,21 +1419,54 @@ export function MaringaImoveisMap({
                 <select
                   id="mim-report-sort"
                   value={reportSort}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setReportSort(
                       event.target.value as
                         | 'neighborhood'
                         | 'apartment'
                         | 'house'
                         | 'combined'
-                    )
-                  }
+                    );
+                    setReportSortDirection('desc');
+                  }}
                 >
                   <option value="neighborhood">Bairro</option>
                   <option value="combined">Combinado (maior)</option>
                   <option value="apartment">Apartamento (maior)</option>
                   <option value="house">Casa (maior)</option>
                 </select>
+                <button
+                  type="button"
+                  className="mim-report-sort-direction"
+                  onClick={() =>
+                    setReportSortDirection((direction) =>
+                      direction === 'desc' ? 'asc' : 'desc'
+                    )
+                  }
+                  aria-label="Alternar direção da ordenação"
+                >
+                  {reportSortDirection === 'desc' ? '↓' : '↑'}
+                </button>
+              </div>
+              <div className="mim-report-region-filter">
+                <span>Região:</span>
+                <button
+                  type="button"
+                  className={!reportRegion ? 'is-active' : ''}
+                  onClick={() => setReportRegion('')}
+                >
+                  Todas
+                </button>
+                {regions.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={reportRegion === item ? 'is-active' : ''}
+                    onClick={() => setReportRegion(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
               </div>
               <span>{priceM2Report.length} bairros oficiais</span>
               <span className="mim-report-scale">menor <i /> maior</span>
