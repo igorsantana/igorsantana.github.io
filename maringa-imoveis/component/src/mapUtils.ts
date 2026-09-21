@@ -60,6 +60,8 @@ export interface FilterState {
   minDorms: number;
   minPrice: number | null;
   maxPrice: number | null;
+  minArea: number | null;
+  maxArea: number | null;
 }
 
 export function recMatchesFilter(rec: MapRecord, filters: FilterState) {
@@ -72,6 +74,9 @@ export function recMatchesFilter(rec: MapRecord, filters: FilterState) {
   const price = rec[2];
   if (filters.minPrice != null && price < filters.minPrice) return false;
   if (filters.maxPrice != null && price > filters.maxPrice) return false;
+  const area = rec[5];
+  if (filters.minArea != null && (area == null || area < filters.minArea)) return false;
+  if (filters.maxArea != null && (area == null || area > filters.maxArea)) return false;
   return true;
 }
 

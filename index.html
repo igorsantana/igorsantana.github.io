@@ -13,7 +13,14 @@
     <div class="site-header__inner">
       <p class="site-id">igor.santana</p>
       <div class="toolbar">
-        <div class="toolbar-group" role="group" aria-label="Theme">
+        <a class="projects-link" href="projects.html">
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          <span>PROJETOS</span>
+        </a>
+        <div class="toolbar-group" role="group" aria-label="Actions">
+          <button type="button" id="print-toggle" class="toggle toggle--icon" aria-label="Download PDF">
+            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+          </button>
           <button type="button" id="theme-toggle" class="toggle toggle--icon" aria-pressed="true" aria-label="Switch to day mode">
             <i id="theme-toggle-icon" class="fa-solid fa-sun" aria-hidden="true"></i>
           </button>
@@ -108,6 +115,7 @@
     </div>
   </main>
 
+  <script src="assets/json-resume-export.js"></script>
   <script src="assets/resume.js"></script>
 </body>
 </html>

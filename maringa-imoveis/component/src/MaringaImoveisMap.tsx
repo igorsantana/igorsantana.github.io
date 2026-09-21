@@ -77,6 +77,8 @@ export function MaringaImoveisMap({
   const [minDorms, setMinDorms] = useState(0);
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
+  const [minAreaInput, setMinAreaInput] = useState('');
+  const [maxAreaInput, setMaxAreaInput] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('pontos');
   const [metric, setMetric] = useState<MetricMode>('preco');
   const [heatWeight, setHeatWeight] = useState<HeatWeight>('densidade');
@@ -140,8 +142,18 @@ export function MaringaImoveisMap({
       minDorms,
       minPrice: parsePriceInput(minPriceInput),
       maxPrice: parsePriceInput(maxPriceInput),
+      minArea: parsePriceInput(minAreaInput),
+      maxArea: parsePriceInput(maxAreaInput),
     }),
-    [selectedTypes, neighborhood, minDorms, minPriceInput, maxPriceInput]
+    [
+      selectedTypes,
+      neighborhood,
+      minDorms,
+      minPriceInput,
+      maxPriceInput,
+      minAreaInput,
+      maxAreaInput,
+    ]
   );
 
   const filtered = useMemo(() => {
@@ -452,6 +464,26 @@ export function MaringaImoveisMap({
               inputMode="numeric"
               value={maxPriceInput}
               onChange={(event) => setMaxPriceInput(event.target.value)}
+            />
+          </div>
+
+          <div className="mim-sec">Área privativa (m²)</div>
+          <div className="mim-price-row">
+            <input
+              className="mim-input"
+              placeholder="mín"
+              inputMode="numeric"
+              value={minAreaInput}
+              onChange={(event) => setMinAreaInput(event.target.value)}
+              aria-label="Área mínima em metros quadrados"
+            />
+            <input
+              className="mim-input"
+              placeholder="máx"
+              inputMode="numeric"
+              value={maxAreaInput}
+              onChange={(event) => setMaxAreaInput(event.target.value)}
+              aria-label="Área máxima em metros quadrados"
             />
           </div>
 

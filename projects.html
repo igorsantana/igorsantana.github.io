@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Igor Santana — Projects">
+  <title>Igor Santana — Projects</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="assets/index.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-id site-id--link" href="index.html">igor.santana</a>
+      <div class="toolbar">
+        <a class="projects-link projects-link--active" href="projects.html" aria-current="page">
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          <span>PROJETOS</span>
+        </a>
+        <button type="button" id="projects-theme-toggle" class="toggle toggle--icon" aria-pressed="true" aria-label="Switch to day mode">
+          <i id="projects-theme-toggle-icon" class="fa-solid fa-sun" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="projects-page">
+    <header class="projects-page__header">
+      <p class="eyebrow">PROJECTS</p>
+      <h1>Projetos</h1>
+      <p>Experimentos e produtos desenvolvidos por Igor Santana.</p>
+    </header>
+
+    <section class="project-index" aria-label="Project index">
+      <article class="project-card">
+        <div class="project-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-map-location-dot"></i>
+        </div>
+        <div class="project-card__content">
+          <p class="project-card__label">MAPA INTERATIVO</p>
+          <h2>Maringá Imóveis</h2>
+          <p>
+            Mapa interativo de imóveis residenciais à venda em Maringá, com filtros,
+            mapa de calor e dados coletados ao vivo.
+          </p>
+          <a class="project-card__link" href="maringa-imoveis/">
+            Abrir projeto
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+          </a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const themeKey = 'resume-theme';
+    const root = document.documentElement;
+    const toggle = document.getElementById('projects-theme-toggle');
+    const icon = document.getElementById('projects-theme-toggle-icon');
+
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      const isDark = theme === 'dark';
+      toggle.setAttribute('aria-pressed', String(isDark));
+      toggle.setAttribute('aria-label', isDark ? 'Switch to day mode' : 'Switch to night mode');
+      icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+
+    setTheme(localStorage.getItem(themeKey) || 'dark');
+    toggle.addEventListener('click', () => {
+      const nextTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(themeKey, nextTheme);
+      setTheme(nextTheme);
+    });
+  </script>
+</body>
+</html>

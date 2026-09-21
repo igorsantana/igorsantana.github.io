@@ -90,6 +90,24 @@ a:hover {
   --toolbar-control-height: 2rem;
 }
 
+.projects-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: var(--toolbar-control-height);
+  padding: 0 0.55rem;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.projects-link:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
 .toolbar-group {
   display: flex;
   gap: 0.35rem;
@@ -594,4 +612,231 @@ a:hover {
   .toggle {
     transition: none;
   }
+}
+
+@media print {
+  :root,
+  [data-theme="dark"],
+  [data-theme="light"] {
+    --bg: #fff;
+    --text: #111;
+    --text-muted: #444;
+    --accent: #222;
+    --border: #ccc;
+    --hover: #111;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm 14mm;
+  }
+
+  html {
+    font-size: 11px;
+  }
+
+  body {
+    background: #fff;
+    color: #111;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .site-header {
+    display: none;
+  }
+
+  .page {
+    padding: 0;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.75fr);
+    grid-template-rows: auto auto;
+    gap: 1rem 2rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ccc;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .hero__identity {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .hero__summary {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .hero__skills {
+    grid-column: 2;
+    grid-row: 1 / -1;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem 2rem;
+    align-items: start;
+  }
+
+  .block {
+    margin-bottom: 1.25rem;
+  }
+
+  .block--nested {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  .entry,
+  .pub-entry {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1.1rem;
+  }
+
+  .download-btn {
+    display: none !important;
+  }
+
+  a {
+    color: #111;
+    text-decoration: none;
+  }
+
+  .avatar {
+    width: 96px;
+    height: 96px;
+    image-rendering: auto;
+  }
+
+  .name {
+    font-size: 18px;
+  }
+
+  .section-title {
+    margin-bottom: 0.85rem;
+  }
+
+  .summary-text p {
+    font-size: 11px;
+  }
+
+  .skill-tag {
+    font-size: 10px;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .publications {
+    gap: 0.85rem;
+  }
+}
+
+.site-id--link {
+  color: var(--text-muted);
+}
+
+.site-id--link:hover {
+  color: var(--text);
+}
+
+.projects-link--active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.projects-page {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 7rem) clamp(1.25rem, 4vw, 3rem);
+}
+
+.projects-page__header {
+  max-width: 650px;
+  margin-bottom: 3rem;
+}
+
+.eyebrow,
+.project-card__label {
+  margin: 0 0 0.65rem;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.projects-page h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+}
+
+.projects-page__header p:last-child {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.project-index {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.project-card {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+
+.project-card__icon {
+  display: grid;
+  flex: 0 0 2.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.project-card__content {
+  min-width: 0;
+}
+
+.project-card__label {
+  margin-bottom: 0.35rem;
+  font-size: 10px;
+}
+
+.project-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.project-card p:not(.project-card__label) {
+  margin: 0 0 1.25rem;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.project-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.project-card__link:hover {
+  color: var(--hover);
 }
