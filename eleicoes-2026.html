@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cola pessoal para as Eleições 2026 no Paraná">
+  <title>Cola eleitoral — Paraná 2026</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="assets/index.css">
+  <link rel="stylesheet" href="assets/election.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-id site-id--link" href="index.html">igor.santana</a>
+      <div class="toolbar">
+        <a class="projects-link projects-link--active" href="projects.html">
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          <span>PROJETOS</span>
+        </a>
+        <button type="button" id="election-theme-toggle" class="toggle toggle--icon" aria-pressed="true" aria-label="Mudar para modo dia">
+          <i id="election-theme-icon" class="fa-solid fa-sun" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="election-page">
+    <header class="election-header">
+      <p class="eyebrow">FERRAMENTA PESSOAL · PARANÁ</p>
+      <h1>Cola eleitoral <span>2026</span></h1>
+      <p>Salve os nomes e números das suas escolhas para consultar rapidamente no dia da votação.</p>
+    </header>
+
+    <section class="election-notice" aria-label="Aviso importante">
+      <i class="fa-solid fa-lock" aria-hidden="true"></i>
+      <p><strong>Seus dados ficam neste navegador.</strong> Nada é enviado para um servidor. Confira os números no TSE antes de votar.</p>
+      <a href="https://divulgacandcontas.tse.jus.br/" target="_blank" rel="noopener noreferrer">Consultar TSE <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </section>
+
+    <form id="election-form" class="ballot-form">
+      <div class="ballot-form__top">
+        <div>
+          <p class="eyebrow">ORDEM DA URNA</p>
+          <p class="ballot-form__hint">Digite o número para preencher o nome e a foto automaticamente.</p>
+        </div>
+        <span id="save-status" class="save-status" role="status" aria-live="polite">salvamento automático</span>
+      </div>
+
+      <div class="candidate-grid">
+        <label class="candidate-card" data-office="federal">
+          <span class="candidate-card__number">01</span>
+          <span class="candidate-card__title">Deputado federal</span>
+          <span class="candidate-card__rule">4 dígitos</span>
+          <input type="text" name="federal-name" placeholder="Nome da candidata ou candidato" autocomplete="off">
+          <input type="text" name="federal-number" class="candidate-number" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0000" aria-label="Número do deputado federal">
+          <img class="candidate-photo" alt="" hidden>
+        </label>
+
+        <label class="candidate-card" data-office="state">
+          <span class="candidate-card__number">02</span>
+          <span class="candidate-card__title">Deputado estadual</span>
+          <span class="candidate-card__rule">5 dígitos</span>
+          <input type="text" name="state-name" placeholder="Nome da candidata ou candidato" autocomplete="off">
+          <input type="text" name="state-number" class="candidate-number" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" placeholder="00000" aria-label="Número do deputado estadual">
+          <img class="candidate-photo" alt="" hidden>
+        </label>
+
+        <label class="candidate-card candidate-card--senator" data-office="senator">
+          <span class="candidate-card__number">03</span>
+          <span class="candidate-card__title">Senador · 1ª vaga</span>
+          <span class="candidate-card__rule">3 dígitos</span>
+          <input type="text" name="senator-1-name" placeholder="Nome da candidata ou candidato" autocomplete="off">
+          <input type="text" name="senator-1-number" class="candidate-number" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" placeholder="000" aria-label="Número do primeiro senador">
+          <img class="candidate-photo" alt="" hidden>
+        </label>
+
+        <label class="candidate-card candidate-card--senator" data-office="senator">
+          <span class="candidate-card__number">04</span>
+          <span class="candidate-card__title">Senador · 2ª vaga</span>
+          <span class="candidate-card__rule">3 dígitos</span>
+          <input type="text" name="senator-2-name" placeholder="Nome da candidata ou candidato" autocomplete="off">
+          <input type="text" name="senator-2-number" class="candidate-number" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" placeholder="000" aria-label="Número do segundo senador">
+          <img class="candidate-photo" alt="" hidden>
+        </label>
+
+        <label class="candidate-card" data-office="governor">
+          <span class="candidate-card__number">05</span>
+          <span class="candidate-card__title">Governador e vice</span>
+          <span class="candidate-card__rule">2 dígitos</span>
+          <input type="text" name="governor-name" placeholder="Nome da chapa" autocomplete="off">
+          <input type="text" name="governor-number" class="candidate-number" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" placeholder="00" aria-label="Número do governador">
+          <img class="candidate-photo" alt="" hidden>
+        </label>
+
+        <label class="candidate-card" data-office="president">
+          <span class="candidate-card__number">06</span>
+          <span class="candidate-card__title">Presidente e vice</span>
+          <span class="candidate-card__rule">2 dígitos</span>
+          <input type="text" name="president-name" placeholder="Nome da chapa" autocomplete="off">
+          <input type="text" name="president-number" class="candidate-number" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" placeholder="00" aria-label="Número do presidente">
+          <img class="candidate-photo" alt="" hidden>
+        </label>
+      </div>
+
+      <div class="ballot-actions">
+        <button type="button" class="action-button" id="copy-election">
+          <i class="fa-regular fa-copy" aria-hidden="true"></i> Copiar cola
+        </button>
+        <button type="button" class="action-button action-button--muted" id="clear-election">
+          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Limpar dados
+        </button>
+        <button type="button" class="action-button action-button--muted" id="print-election">
+          <i class="fa-solid fa-print" aria-hidden="true"></i> Imprimir
+        </button>
+      </div>
+    </form>
+
+    <footer class="election-footer">
+      <p>1º turno: <strong>4 de outubro de 2026</strong> · eventual 2º turno: <strong>25 de outubro de 2026</strong></p>
+      <p>Ferramenta pessoal, sem vínculo com a Justiça Eleitoral.</p>
+    </footer>
+  </main>
+
+  <script src="assets/election.js"></script>
+</body>
+</html>
