@@ -244,6 +244,7 @@ export function MaringaImoveisMap({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const heatRef = useRef<L.HeatLayer | null>(null);
   const boundaryLayerRef = useRef<L.GeoJSON | null>(null);
+  const pinRendererRef = useRef<L.Renderer | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
   const renderedIdsRef = useRef<Set<string>>(new Set());
   const needsFullRedrawRef = useRef(true);
@@ -400,6 +401,11 @@ export function MaringaImoveisMap({
       fadeAnimation: false,
     }).setView(defaultCenter, defaultZoom);
 
+    map.createPane('neighborhoods');
+    const neighborhoodPane = map.getPane('neighborhoods');
+    if (neighborhoodPane) neighborhoodPane.style.zIndex = '350';
+    pinRendererRef.current = L.svg({ pane: 'overlayPane' });
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: OSM_ATTRIBUTION,
       maxZoom: 19,
@@ -427,6 +433,7 @@ export function MaringaImoveisMap({
       map.remove();
       mapInstanceRef.current = null;
       heatRef.current = null;
+      pinRendererRef.current = null;
       markersRef.current = null;
       renderedIdsRef.current.clear();
     };
@@ -445,6 +452,7 @@ export function MaringaImoveisMap({
     const layer = L.geoJSON(
       boundaries as unknown as GeoJSON.GeoJsonObject,
       {
+        pane: 'neighborhoods',
         style: (feature) => {
           const typedFeature = feature as
             | NeighborhoodCollection['features'][number]
@@ -711,6 +719,8 @@ export function MaringaImoveisMap({
       weight: 0.5,
       fillColor: colorFor(rec, dataForColor, metric),
       fillOpacity: 0.85,
+      pane: 'overlayPane',
+      renderer: pinRendererRef.current ?? undefined,
     })
       .bindPopup(popupHtml(rec, recordLocations.get(rec[10])))
       .on('click', () => {
