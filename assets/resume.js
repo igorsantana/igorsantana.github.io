@@ -208,6 +208,7 @@ const content = {
       langEn: 'English',
       langPt: 'Portuguese',
       selectLanguage: 'Select language',
+      printResume: 'Download PDF',
     },
   },
   pt: {
@@ -407,6 +408,7 @@ const content = {
       langEn: 'Inglês',
       langPt: 'Português',
       selectLanguage: 'Selecionar idioma',
+      printResume: 'Baixar PDF',
     },
   },
 };
@@ -476,6 +478,23 @@ function updateLangDropdown(lang) {
     const isSelected = btn.dataset.langOption === lang;
     btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
   });
+}
+
+function updatePrintButton(lang) {
+  const printToggle = document.getElementById('print-toggle');
+  if (printToggle) {
+    printToggle.setAttribute('aria-label', content[lang].toggles.printResume);
+  }
+}
+
+function downloadResumePdf() {
+  const lang = document.documentElement.getAttribute('lang')?.startsWith('pt') ? 'pt' : 'en';
+  const link = document.createElement('a');
+  link.href = `files/Igor-Santana-Resume-${lang}.pdf`;
+  link.download = `Igor-Santana-Resume-${lang}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 function closeLangDropdown() {
@@ -562,6 +581,7 @@ function renderContent(lang) {
 
   updateLangDropdown(lang);
   updateThemeToggle();
+  updatePrintButton(lang);
 
   const experienceList = document.getElementById('experience-list');
   experienceList.innerHTML = data.experience
@@ -679,6 +699,8 @@ function initResume() {
     const current = document.documentElement.getAttribute('data-theme');
     setTheme(current === 'dark' ? 'light' : 'dark');
   });
+
+  document.getElementById('print-toggle').addEventListener('click', downloadResumePdf);
 
   initLangDropdown();
 }
