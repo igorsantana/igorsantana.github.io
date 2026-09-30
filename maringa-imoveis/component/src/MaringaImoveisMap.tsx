@@ -31,6 +31,7 @@ import {
 } from './neighborhoodData';
 import { useMapDataSource } from './useMapDataLoader';
 import { useSub100LiveLoader } from './useSub100LiveLoader';
+import { computeBreaks } from './mapDataBuilder';
 import './MaringaImoveisMap.css';
 
 const DEFAULT_CENTER: [number, number] = [-23.43, -51.95];
@@ -550,6 +551,23 @@ export function MaringaImoveisMap({
     );
   }, [mapData, filters, recordLocations]);
 
+  const filteredMapData = useMemo(() => {
+    if (!mapData) return null;
+
+    const prices = filtered.map((rec) => rec[2]);
+    const pricesM2 = filtered
+      .filter((rec) => rec[3] != null)
+      .map((rec) => rec[3] as number);
+
+    return {
+      ...mapData,
+      count: filtered.length,
+      records: filtered,
+      breaks_price: computeBreaks(prices),
+      breaks_pm2: computeBreaks(pricesM2),
+    };
+  }, [filtered, mapData]);
+
   const selectedNeighborhoodRecords = useMemo(
     () =>
       filtered.filter(
@@ -674,15 +692,19 @@ export function MaringaImoveisMap({
   );
 
   const legend = useMemo(() => {
-    if (!mapData || !mapData.records.length) return null;
-    return buildLegend(mapData, viewMode, metric, heatWeight);
-  }, [mapData, viewMode, metric, heatWeight]);
+    if (!filteredMapData || !filteredMapData.records.length) return null;
+    return buildLegend(filteredMapData, viewMode, metric, heatWeight);
+  }, [filteredMapData, viewMode, metric, heatWeight]);
 
   useEffect(() => {
     needsFullRedrawRef.current = true;
   }, [viewMode, metric, heatWeight, filters]);
 
-  const appendMarker = (rec: MapRecord, group: L.LayerGroup, dataForColor: NonNullable<typeof mapData>) => {
+  const appendMarker = (
+    rec: MapRecord,
+    group: L.LayerGroup,
+    dataForColor: NonNullable<typeof filteredMapData>
+  ) => {
     L.circleMarker([rec[1], rec[0]], {
       radius: 6,
       color: '#fff',
@@ -701,7 +723,7 @@ export function MaringaImoveisMap({
   useEffect(() => {
     const map = mapInstanceRef.current;
     const heat = heatRef.current;
-    if (!map || !heat || !mapData) return;
+    if (!map || !heat || !mapData || !filteredMapData) return;
 
     if (viewMode === 'calor') {
       if (markersRef.current) {
@@ -711,7 +733,7 @@ export function MaringaImoveisMap({
       }
       if (!map.hasLayer(heat)) heat.addTo(map);
       applyHeatOptions(heat, filtered.length, heatWeight);
-      heat.setLatLngs(buildHeatPoints(filtered, mapData, heatWeight));
+      heat.setLatLngs(buildHeatPoints(filtered, filteredMapData, heatWeight));
       return;
     }
 
@@ -733,9 +755,9 @@ export function MaringaImoveisMap({
       const id = rec[10];
       if (renderedIdsRef.current.has(id)) continue;
       renderedIdsRef.current.add(id);
-      appendMarker(rec, group, mapData);
+      appendMarker(rec, group, filteredMapData);
     }
-  }, [mapData, filtered, viewMode, metric, heatWeight]);
+  }, [filteredMapData, filtered, mapData, viewMode, metric, heatWeight]);
 
   const toggleType = (type: string, checked: boolean) => {
     setSelectedTypes((prev) => {
